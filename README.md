@@ -1,3 +1,6 @@
 # Snake
 This is my implementation of well-known snake game.
-Game runs in console to feel old style :)
+Game runs in console to look like old piece of software :)
+
+To create this I used conio2 library
+http://conio.sourceforge.net/
