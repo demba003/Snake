@@ -6,17 +6,15 @@
 #include <thread>
 #include <windows.h>
 #include <vector>
-#include <array>
 #include <ctime>
 
 using namespace std;
 bool STOP_MUSIC = false;
 int DIRECT;
 bool SET_DIRECT = true;;
-bool PAUSE = false;
-struct text_info info;
 
-void music()																			//function to play bg music in separate thread
+//function to play bg music in separate thread
+void music()
 {
 	while (1) {
 		if (STOP_MUSIC) break;
@@ -33,226 +31,24 @@ void music()																			//function to play bg music in separate thread
 	}
 }
 
-struct Point {
-	int x;
-	int y;
-};
-
-struct Snake {
-	int length;
-	int image;
-	vector<Point> location;
-} snake;
-
-void initSnake(int x, int y) {
-	snake.length = 1;
-	snake.image = 178;
-	gotoxy(x, y);
-	snake.location.push_back({ x, y });
-	textcolor(GREEN);
-}
-
-struct Food {
-	int pos_x, pos_y;
-	int image;																			
-} food;
-
-void changeFoodPos(int x = 0, int y = 0) {
-	srand(time(NULL));
-	bool goodPos = false;
-
-	if (!x && !y) {
-		x = (rand() % (info.screenwidth - 2)) + 2;
-		y = (rand() % (info.screenheight - 2)) + 2;
-	}
-
-	gotoxy(x, y);
-	printf("%c", food.image);
-	gotoxy(snake.location.back().x, snake.location.back().y);
-	food.pos_x = x;
-	food.pos_y = y;
-}
-
-void initFood(int x, int y, int img = 260) {
-	food.pos_x = x;
-	food.pos_y = y;
-	food.image = img;
-	changeFoodPos(x, y);
-}
-
-bool isMoveAllowed() {
-	switch (DIRECT) {
-	case 1:																				//up
-		for (int i = 0; i < snake.location.size(); i++) {
-			if (wherex() == snake.location[i].x && (wherey() - 1) == snake.location[i].y) return false;
-		}
-		if (wherey() == 2) return false;
-		break;
-	case 2:																				//down
-		for (int i = 0; i < snake.location.size(); i++) {
-			if (wherex() == snake.location[i].x && (wherey() + 1) == snake.location[i].y) return false;
-		}
-		if (wherey() == info.screenheight - 1) return false;
-		break;
-	case 3:																				//left
-		for (int i = 0; i < snake.location.size(); i++) {
-			if ((wherex() - 1) == snake.location[i].x && wherey() == snake.location[i].y) return false;
-		}
-		if (wherex() == 2) return false;
-		break;
-	case 4:																				//right
-		for (int i = 0; i < snake.location.size(); i++) {
-			if ((wherex() + 1) == snake.location[i].x && wherey() == snake.location[i].y) return false;
-		}
-		if (wherex() == info.screenwidth - 1) return false;
-		break;
-	}
-	return true;
-}
-
-
-void SnakeMove() {
-	while (!STOP_MUSIC) {
-		if (STOP_MUSIC) break;
-		switch (DIRECT) {
-		case 1:																			//up
-			if (isMoveAllowed()) {
-				if (snake.location.back().x == food.pos_x && snake.location.back().y == food.pos_y) {
-					snake.location.push_back({ wherex(), wherey() });
-					printf("%c", snake.image);
-					gotoxy(snake.location.back().x, snake.location.back().y - 1);
-					snake.location.push_back({ wherex(), wherey() });
-					changeFoodPos();
-				}
-				else {
-					printf("%c", snake.image);
-					gotoxy(snake.location[0].x, snake.location[0].y);
-					printf("%s", " ");
-					gotoxy(snake.location.back().x, snake.location.back().y - 1);
-					snake.location.push_back({ wherex(), wherey() });
-					snake.location.erase(snake.location.begin());
-				}
-				SET_DIRECT = true;
-			}
-			else {
-				STOP_MUSIC = true;
-				DIRECT = 0;
-				gotoxy(1, 1);
-				textcolor(BLACK);
-				textbackground(DARKGRAY);
-				cout << "Game Over";
-				gotoxy(snake.location.back().x, snake.location.back().y);
-				return;
-			}
-				
-			break;
-		case 2:																			//down
-			if (isMoveAllowed()) {
-				if (snake.location.back().x == food.pos_x && snake.location.back().y == food.pos_y) {
-					snake.location.push_back({ wherex(), wherey() });
-					printf("%c", snake.image);
-					gotoxy(snake.location.back().x, snake.location.back().y + 1);
-					snake.location.push_back({ wherex(), wherey() });
-					changeFoodPos();
-				}
-				else {
-					printf("%c", snake.image);
-					gotoxy(snake.location[0].x, snake.location[0].y);
-					printf("%s", " ");
-					gotoxy(snake.location.back().x, snake.location.back().y + 1);
-					snake.location.push_back({ wherex(), wherey() } );
-					snake.location.erase(snake.location.begin());
-				}
-				SET_DIRECT = true;
-			}
-			else {
-				STOP_MUSIC = true;
-				DIRECT = 0;
-				gotoxy(1, 1);
-				textcolor(BLACK);
-				textbackground(DARKGRAY);
-				cout << "Game Over";
-				gotoxy(snake.location.back().x, snake.location.back().y);
-				return;
-			}
-			break;
-		case 3:																			//left
-			if (isMoveAllowed()) {
-				if (snake.location.back().x == food.pos_x && snake.location.back().y == food.pos_y) {
-					snake.location.push_back({ wherex(), wherey() });
-					printf("%c", snake.image);
-					gotoxy(snake.location.back().x - 1, snake.location.back().y);
-					snake.location.push_back({ wherex(), wherey() });
-					changeFoodPos();
-				}
-				else {
-					printf("%c", snake.image);
-					gotoxy(snake.location[0].x, snake.location[0].y);
-					printf("%s", " ");
-					gotoxy(snake.location.back().x - 1, snake.location.back().y);
-					snake.location.push_back({ wherex(), wherey() });
-					snake.location.erase(snake.location.begin());
-				}
-				SET_DIRECT = true;
-			}
-			else {
-				STOP_MUSIC = true;
-				DIRECT = 0;
-				gotoxy(1, 1);
-				textcolor(BLACK);
-				textbackground(DARKGRAY);
-				cout << "Game Over";
-				gotoxy(snake.location.back().x, snake.location.back().y);
-				return;
-			}
-			break;
-		case 4:																			//right
-			if (isMoveAllowed()) {
-				if (snake.location.back().x == food.pos_x && snake.location.back().y == food.pos_y) {
-					snake.location.push_back({ wherex(), wherey() });
-					printf("%c", snake.image);
-					snake.location.push_back({ wherex(), wherey() });
-					changeFoodPos();
-				}
-				else {
-					printf("%c", snake.image);
-					gotoxy(snake.location[0].x, snake.location[0].y);
-					printf("%s", " ");
-					gotoxy(snake.location.back().x + 1, snake.location.back().y);
-					snake.location.push_back({ wherex(), wherey() });
-					snake.location.erase(snake.location.begin());
-				}
-				SET_DIRECT = true;
-			}
-			else {
-				STOP_MUSIC = true;
-				DIRECT = 0;
-				gotoxy(1, 1);
-				textcolor(BLACK);
-				textbackground(DARKGRAY);
-				cout << "Game Over";
-				gotoxy(snake.location.back().x, snake.location.back().y);
-				return;
-			}
-			break;
-		}
-		gotoxy(food.pos_x, food.pos_y);
-		printf("%c", food.image);
-		gotoxy(snake.location.back().x, snake.location.back().y);
-		Sleep(100);
-	}
-
-}
-
-void generate(int bgColor = BLACK, int borderColor = DARKGRAY) {
+class Level2 {
+private:
+	int scr_height;
+	int scr_width;
+	int backgroundColor;
+	int foregroundColor;
+public:
+	Level2(int bgColor = BLACK, int borderColor = DARKGRAY) {
 		int i;
-		gettextinfo(&info);		 	   													// get the info about screen 
-		_setcursortype(_SOLIDCURSOR);													// set cursor type
-		clrscr();																		// clear the screen 
+		struct text_info info;
+		gettextinfo(&info);
+		_setcursortype(_SOLIDCURSOR);
+		clrscr();
 		gotoxy(1, 1);
-		switchbackground(bgColor);														//set colors
+		switchbackground(bgColor);
 		textcolor(borderColor);
-		for (i = 1; i <= info.screenwidth; i++) printf("%c", 219);						// paint border around screen 
+		//paint border around screen 
+		for (i = 1; i <= info.screenwidth; i++) printf("%c", 219);
 		gotoxy(1, info.screenheight);
 		for (i = 0; i < info.screenwidth; i++) printf("%c", 219);
 		for (i = 2; i < info.screenheight; i++) {
@@ -262,18 +58,301 @@ void generate(int bgColor = BLACK, int borderColor = DARKGRAY) {
 			printf("%c", 219);
 		}
 		gotoxy(1, 1);
+		scr_height = info.screenheight;
+		scr_width = info.screenwidth;
+		backgroundColor = bgColor;
+		foregroundColor = borderColor;
+		updateScore(0, GREEN);
+	}
+
+	void gameOver() {
+		STOP_MUSIC = true;
+		DIRECT = 0;
+		gotoxy(1, 1);
+		textcolor(backgroundColor);
+		textbackground(foregroundColor);
+		cout << "Game Over";
+	}
+	int getBgColor() {
+		return backgroundColor;
+	}
+	int getBorderColor() {
+		return foregroundColor;
+	}
+	int getWidth() {
+		return scr_width;
+	}
+	int getHeight() {
+		return scr_height;
+	}
+
+	void updateScore(int score, int snakeColor) {
+		gotoxy(getWidth() / 2 - 5, 1);
+		textbackground(foregroundColor);
+		textcolor(BLACK);
+		cout << "Score: " << score;
+		textcolor(snakeColor);
+		textbackground(backgroundColor);
+	}
+};
+
+class Food2 {
+private:
+	struct Point {
+		int x;
+		int y;
+	};
+	int max_width;
+	int max_height;
+	Point location;
+	int image;
+	int color;
+public:
+	Point getPos() {
+		return location;
+	}
+
+	void changePos(int x = 0, int y = 0) {
+		srand(time(NULL));
+		if (!x && !y) {
+			x = (rand() % (max_width - 2)) + 2;
+			y = (rand() % (max_height - 2)) + 2;
+		}
+
+		gotoxy(x, y);
+		printf("%c", image);
+		location.x = x;
+		location.y = y;
+	}
+
+	int getColor() {
+		return color;
+	}
+
+	Food2(Level2 lvl, int x, int y, int img = 260, int color = GREEN) {
+		location.x = x;
+		location.y = y;
+		image = img;
+		max_width = lvl.getWidth();
+		max_height = lvl.getHeight();
+		this->color = color;
+		changePos(x, y);
+	}
+
+	void update() {
+		textcolor(color);
+		gotoxy(location.x, location.y);
+		printf("%c", image);
+	}
+};
+
+class Snake2 {
+private:
+	struct Point {
+		int x;
+		int y;
+	};
+	int image;
+	vector<Point> location;
+	int moving_direction;
+	int lvl_width, lvl_height;
+	int color;
+public: 
+	int getImage() {
+		return image;
+	}
+	Point getHeadPos() {
+		return location.back();
+	}
+
+	Point getTailPos() {
+		return location[0];
+	}
+	int getColor() {
+		return color;
+	}
+
+	Snake2(Level2 lvl, int x = 2, int y = 2, int img = 178, int color = GREEN) {
+		image = img;
+		gotoxy(x, y);
+		location.push_back({ x, y });
+		this->color = color;
+		textcolor(color);
+		lvl_height = lvl.getHeight();
+		lvl_width = lvl.getWidth();
+	}
+
+	void removeLast() {
+		location.erase(location.begin());
+	}
+
+	void addCurrent() {
+		location.push_back({ wherex(), wherey() });
+	}
+
+	int getLength() {
+		return location.size();
+	}
+
+	bool isMoveAllowed() {
+		switch (DIRECT) {
+		case 1:																				//up
+			for (int i = 0; i < location.size(); i++) {
+				if (wherex() == location[i].x && (wherey() - 1) == location[i].y) return false;
+			}
+			if (wherey() == 2) return false;
+			break;
+		case 2:																				//down
+			for (int i = 0; i < location.size(); i++) {
+				if (wherex() == location[i].x && (wherey() + 1) == location[i].y) return false;
+			}
+			if (wherey() == lvl_height - 1) return false;
+			break;
+		case 3:																				//left
+			for (int i = 0; i < location.size(); i++) {
+				if ((wherex() - 1) == location[i].x && wherey() == location[i].y) return false;
+			}
+			if (wherex() == 2) return false;
+			break;
+		case 4:																				//right
+			for (int i = 0; i < location.size(); i++) {
+				if ((wherex() + 1) == location[i].x && wherey() == location[i].y) return false;
+			}
+			if (wherex() == lvl_width - 1) return false;
+			break;
+		}
+		return true;
+	}
+};
+
+void movement(Snake2 snake, Food2 food, Level2 lvl) {
+	while (!STOP_MUSIC) {
+		if (STOP_MUSIC) break;
+		switch (DIRECT) {
+		case 1:																				//up
+			if (snake.isMoveAllowed()) {
+				if (snake.getHeadPos().x == food.getPos().x && snake.getHeadPos().y == food.getPos().y) {
+					snake.addCurrent();
+					printf("%c", snake.getImage());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y - 1);
+					food.changePos();
+					lvl.updateScore(snake.getLength() - 1, snake.getColor());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				}
+				else {
+					printf("%c", snake.getImage());
+					gotoxy(snake.getTailPos().x, snake.getTailPos().y);
+					printf("%s", " ");
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y - 1);
+					snake.addCurrent();
+					snake.removeLast();
+				}
+				SET_DIRECT = true;
+			}
+			else {
+				lvl.gameOver();
+				gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				return;
+			}
+
+			break;
+		case 2:																				//down
+			if (snake.isMoveAllowed()) {
+				if (snake.getHeadPos().x == food.getPos().x && snake.getHeadPos().y == food.getPos().y) {
+					snake.addCurrent();
+					printf("%c", snake.getImage());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y + 1);
+					food.changePos();
+					lvl.updateScore(snake.getLength() - 1, snake.getColor());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				}
+				else {
+					printf("%c", snake.getImage());
+					gotoxy(snake.getTailPos().x, snake.getTailPos().y);
+					printf("%s", " ");
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y + 1);
+					snake.addCurrent();
+					snake.removeLast();
+				}
+				SET_DIRECT = true;
+			}
+			else {
+				lvl.gameOver();
+				gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				return;
+			}
+			break;
+		case 3:																				//left
+			if (snake.isMoveAllowed()) {
+				if (snake.getHeadPos().x == food.getPos().x && snake.getHeadPos().y == food.getPos().y) {
+					snake.addCurrent();
+					printf("%c", snake.getImage());
+					gotoxy(snake.getHeadPos().x - 1, snake.getHeadPos().y);
+					food.changePos();
+					lvl.updateScore(snake.getLength() - 1, snake.getColor());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				}
+				else {
+					printf("%c", snake.getImage());
+					gotoxy(snake.getTailPos().x, snake.getTailPos().y);
+					printf("%s", " ");
+					gotoxy(snake.getHeadPos().x - 1, snake.getHeadPos().y);
+					snake.addCurrent();
+					snake.removeLast();
+				}
+				SET_DIRECT = true;
+			}
+			else {
+				lvl.gameOver();
+				gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				return;
+			}
+			break;
+		case 4:																				//right
+			if (snake.isMoveAllowed()) {
+				if (snake.getHeadPos().x == food.getPos().x && snake.getHeadPos().y == food.getPos().y) {
+					snake.addCurrent();
+					printf("%c", snake.getImage());
+					food.changePos();
+					lvl.updateScore(snake.getLength() - 1, snake.getColor());
+					gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				}
+				else {
+					printf("%c", snake.getImage());
+					gotoxy(snake.getTailPos().x, snake.getTailPos().y);
+					printf("%s", " ");
+					gotoxy(snake.getHeadPos().x + 1, snake.getHeadPos().y);
+					snake.addCurrent();
+					snake.removeLast();
+				}
+				SET_DIRECT = true;
+			}
+			else {
+				lvl.gameOver();
+				gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+				return;
+			}
+			break;
+		}
+		food.update();
+		textcolor(snake.getColor());
+		gotoxy(snake.getHeadPos().x, snake.getHeadPos().y);
+		Sleep(100);
+	}
 }
 
 int main() {
-	generate();																			//Prepare level
+	//Prepare level
+	Level2 level(BLACK, DARKGRAY);														
 
-	initSnake(2, 2);																	//Initialize snake;
+	//Initialize food; Image = 260 - diament | 259 - serce | 271 - s³oñce | 270 - nuta | 42 - gwiazdka
+	Food2 food(level, 0, 0, 260, GREEN);
 
-	initFood(0, 0);																		//Initialize food; Image = 260 - diament | 259 - serce | 271 - s³oñce | 270 - nuta | 42 - gwiazdka
+	//Initialize snake;
+	Snake2 snake(level, 2, 2, 178, GREEN);
 	
-
-	//thread musicThread(music);
-	thread movementThread(SnakeMove);
+	thread musicThread(music);
+	thread movementThread(movement, snake, food, level);
 	
 	char userInput;
 
@@ -282,12 +361,7 @@ int main() {
 		if (STOP_MUSIC) break;
 		switch (userInput) {
 			case 27:
-				//Wyjscie - Esc
-				clrscr();
-				STOP_MUSIC = true;
-				cout << "Game Over";
-				break;
-			case 'p':	
+				//Esc - pause
 				DIRECT = 0;
 				break;
 			case 'w':
@@ -324,10 +398,8 @@ int main() {
 				break;
 			}
 	}
-
-	while (getch() != 27) {}
-
-	//musicThread.join();
+	musicThread.join();
 	movementThread.join();
+	while (getch() != 27) {}
 	return 0;
 }
